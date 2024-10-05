@@ -1,59 +1,25 @@
 Building configuration...
 
-Current configuration : 2736 bytes
+Current configuration : 4506 bytes
 !
-! Last configuration change at 05:35:51 UTC Mon Mar 1 1993
+! Last configuration change at 11:47:28 UTC Sat Oct 5 2024 by admin
 !
-version 15.0
-no service pad
+version 16.9
 service timestamps debug datetime msec
 service timestamps log datetime msec
-service password-encryption
+platform qfp utilization monitor load 80
+no platform punt-keepalive disable-kernel-core
+platform console virtual
 !
-hostname COREbaba_51
+hostname APPS1A
 !
 boot-start-marker
 boot-end-marker
 !
 !
 no logging console
-enable secret 5 $1$Tp.q$OEyEXEeqvYTuRSihX6OOZ/
 !
-username admin privilege 15 secret 5 $1$dAx/$FS3akQUA/ltXdRz9KHtEU1
 no aaa new-model
-system mtu routing 1500
-ip routing
-ip domain-name rivanit.com
-!
-ip dhcp excluded-address 10.51.1.1 10.51.1.100
-ip dhcp excluded-address 10.51.10.1 10.51.10.100
-ip dhcp excluded-address 10.51.50.1 10.51.50.100
-ip dhcp excluded-address 10.51.100.1 10.51.100.100
-!
-ip dhcp pool MGMTDATA
- network 10.51.1.0 255.255.255.0
- default-router 10.51.1.4 
- domain-name MGMTDATA.COM
- dns-server 10.51.1.10 
-!
-ip dhcp pool WIFIDATA
- network 10.51.10.0 255.255.255.0
- default-router 10.51.10.4 
- domain-name WIFIDATA.COM
- dns-server 10.51.1.10 
-!
-ip dhcp pool IPCCTV
- network 10.51.50.0 255.255.255.0
- default-router 10.51.50.4 
- domain-name IPCCTV.COM
- dns-server 10.51.1.10 
-!
-ip dhcp pool VOICEVLAN
- network 10.51.100.0 255.255.255.0
- default-router 10.51.100.4 
- domain-name VOICEVLAN.COM
- dns-server 10.51.1.10 
- option 150 ip 10.51.100.8 
 !
 !
 !
@@ -61,15 +27,121 @@ ip dhcp pool VOICEVLAN
 !
 !
 !
+ip name-server 8.8.8.8 1.1.1.1
 !
 !
 !
-spanning-tree mode pvst
+login on-success log
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+! 
+! 
+! 
+! 
+!
+!
+flow record CCNPENCOR-CUSTOM-OUT
+ description CustomFlowforEncorLAB
+ match ipv4 destination address
+ match transport destination-port
+ collect counter bytes
+ collect counter packets
+!
+!
+flow exporter MyflowExporter
+ destination 192.168.108.1
+ transport udp 2055
+!
+!
+flow exporter CCNP8-COLLECTOR-HOST
+ destination 192.168.108.1
+ transport udp 2055
+!
+!
+flow monitor CCNP8-INBOUND-MONITOR
+ exporter CCNP8-COLLECTOR-HOST
+ cache timeout active 30
+ record netflow ipv4 original-input
+!
+!
+flow monitor CCNP8-OUTBOUND-MONITOR
+ exporter CCNP8-COLLECTOR-HOST
+ cache timeout active 30
+ record CCNPENCOR-CUSTOM-OUT
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+crypto pki trustpoint TP-self-signed-2533180427
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-2533180427
+ revocation-check none
+ rsakeypair TP-self-signed-2533180427
+!
+!
+crypto pki certificate chain TP-self-signed-2533180427
+ certificate self-signed 01
+  30820330 30820218 A0030201 02020101 300D0609 2A864886 F70D0101 05050030 
+  31312F30 2D060355 04031326 494F532D 53656C66 2D536967 6E65642D 43657274 
+  69666963 6174652D 32353333 31383034 3237301E 170D3234 31303035 30393334 
+  35365A17 0D333030 31303130 30303030 305A3031 312F302D 06035504 03132649 
+  4F532D53 656C662D 5369676E 65642D43 65727469 66696361 74652D32 35333331 
+  38303432 37308201 22300D06 092A8648 86F70D01 01010500 0382010F 00308201 
+  0A028201 0100C34C E75D9540 EC375BC2 275ABC96 513BE38F 0989BAB8 62FB6C4F 
+  AF5B6759 8A63935D 55F733E6 DFD2B0B7 32B23BBD BE59E152 2EC4760C BD40FD0C 
+  004D9F4B 644DE109 29F8B3E3 E2E2EAC0 3B1CB636 F7876635 AF1198AA 36328B04 
+  07603336 5FD409A9 3A6AFC9E 527393E7 013E8031 4C599818 5784D607 378B8973 
+  87B5DE1F E7CF40D5 DCBDFD0B 7DF34026 8A4A5D10 6D4660D6 645635F5 3D9ED269 
+  C15F6A8E 3BDD4846 F1806A79 4016708F 7D8CE70B CBFE5D57 E343B554 92612D5C 
+  07D13155 BF3C1C05 CF93384A A461ADF8 2D1FB388 CD760F9D 9C40D2DC 11D47DBA 
+  F359AAEF 5A7AAD89 3F396FEB 7CDDD4B5 ED2C01CC 7DAFA197 4A50CAEC 8035763B 
+  0EED1F9C DC9D0203 010001A3 53305130 0F060355 1D130101 FF040530 030101FF 
+  301F0603 551D2304 18301680 148F227B E8C80C4C D3D27FF5 A1E94D6D D024F6C4 
+  6A301D06 03551D0E 04160414 8F227BE8 C80C4CD3 D27FF5A1 E94D6DD0 24F6C46A 
+  300D0609 2A864886 F70D0101 05050003 82010100 4C89BE69 80D0C148 D11651EC 
+  2C4094B2 447F136E B9529814 D233374F 26179398 30BA5DC3 41745013 621D0E27 
+  D44FF311 98825E91 38E014D5 2B019E05 07AAC682 AFA24FE1 F3838D0F 4D5B7C44 
+  CD1236C4 6A9BDC0C 6CCB1A4C 66A8FCA0 321CCE04 A9A22BE1 2923B31E 5C95D5FB 
+  D6B27F58 2926D81E B9BAC898 838712B5 973B871F DD7C99F8 0353C739 74450523 
+  889A3506 632F48CC 896BF7D1 97DAB7D2 1FC37021 B2B571FF E055268A B82FC0B7 
+  F19AE619 4D097BCD CADCD0E5 BAA77B65 C33A3DF2 6B8CFB29 7FE34685 B8C767E0 
+  62F08DFC A79B140B BBB6199F D849CCFB 84B5610D 5DB26560 439AA783 BE6CBCDB 
+  6498FA32 E8C279F8 36E2B991 4F462867 E7B75866
+  	quit
+!
+!
+!
+!
+!
+!
+!
+!
+license udi pid CSR1000V sn 99H6UJXG17B
+license boot level ax
+no license smart enable
+diagnostic bootup level minimal
+!
 spanning-tree extend system-id
 !
-vlan internal allocation policy ascending
 !
-ip ssh version 2
+!
+username admin privilege 15 secret 5 $1$ZnsM$lC.3C.E9xXxevclwEa0r7/
+!
+redundancy
+!
+!
+!
+!
+!
 !
 ! 
 !
@@ -84,82 +156,64 @@ ip ssh version 2
 !
 !
 !
-interface FastEthernet0/1
+! 
+! 
 !
-interface FastEthernet0/2
- switchport access vlan 10
- switchport mode access
 !
-interface FastEthernet0/3
- switchport access vlan 100
- switchport mode access
+interface GigabitEthernet1
+ ip flow monitor CCNP8-INBOUND-MONITOR input
+ ip flow monitor CCNP8-OUTBOUND-MONITOR output
+ ip address 192.168.108.5 255.255.255.0
+ negotiation auto
+ no mop enabled
+ no mop sysid
 !
-interface FastEthernet0/4
- switchport access vlan 10
- switchport mode access
+interface GigabitEthernet2
+ description PYTHONNETMIKO's gigabit 2
+ ip address 192.168.102.5 255.255.255.0
+ negotiation auto
+ no mop enabled
+ no mop sysid
 !
-interface FastEthernet0/5
- switchport access vlan 100
- switchport mode access
+interface GigabitEthernet3
+ description PYTHONNETMIKO's gigabit 3
+ ip address 192.168.103.5 255.255.255.0
+ negotiation auto
+ no mop enabled
+ no mop sysid
 !
-interface FastEthernet0/6
- switchport access vlan 50
- switchport mode access
-!
-interface FastEthernet0/7
- switchport access vlan 100
- switchport mode access
-!
-interface FastEthernet0/8
- switchport access vlan 50
- switchport mode access
-!
-interface FastEthernet0/9
-!
-interface FastEthernet0/10
-!
-interface FastEthernet0/11
-!
-interface FastEthernet0/12
-!
-interface GigabitEthernet0/1
- no switchport
- ip address 10.51.51.4 255.255.255.0
-!
-interface Vlan1
- description MGMTDATA
- ip address 10.51.1.4 255.255.255.0
-!
-interface Vlan10
- description WIRELESS
- ip address 10.51.10.4 255.255.255.0
-!
-interface Vlan50
- description IPCCTV
- ip address 10.51.50.4 255.255.255.0
-!
-interface Vlan100
- description VOICEVLAN
- ip address 10.51.100.4 255.255.255.0
-!
+ip forward-protocol nd
 ip http server
+ip http authentication local
 ip http secure-server
+ip route 0.0.0.0 0.0.0.0 192.168.108.2
 !
 !
-ip route 0.0.0.0 0.0.0.0 10.51.51.1
+!
+!
+!
+!
+control-plane
+!
+!
 !
 !
 !
 !
 line con 0
- exec-timeout 0 0
+ stopbits 1
 line vty 0 4
+ exec-timeout 0 0
  login local
  transport input all
 line vty 5 14
- login local
- transport input all
-line vty 15
+ exec-timeout 0 0
  login
+ transport input all
+!
+!
+!
+!
+!
 !
 end
